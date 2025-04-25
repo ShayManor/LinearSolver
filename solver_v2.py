@@ -31,7 +31,7 @@ def parsedata(data):
     data[1] = (float(data[1]) - 50) / 50
     data[2] = gender[data[2]]
     data[3] = float(data[3]) / 19
-    data[4] = (float(data[4]) - 18.5) / 18
+    data[4] = (float(data[4]) - 18.5) / 20
     data[5] = physical[data[5]]
     data[6] = smoking[data[6]]
     data[7] = alcohol[data[7]]
@@ -39,7 +39,7 @@ def parsedata(data):
     data[9] = yesno[data[9]]
     data[10] = cholesterol[data[10]]
     data[11] = yesno[data[11]]
-    data[12] = float(data[12]) / 60.0
+    data[12] = float(data[12]) / 60
     data[13] = physical[data[13]]
     data[14] = sleep[data[14]]
     data[15] = health[data[15]]
@@ -116,7 +116,9 @@ def test(weights):
 
 
 if __name__ == '__main__':
-    # split()
+    split()
     weights = train()
     correct, length = test(weights)
     print(f"Total Accuracy: {correct}/{length} = {100.0 * float(correct) / length}%")
+    print('------------------------')
+    print(weights.tolist())
