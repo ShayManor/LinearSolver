@@ -6,7 +6,10 @@ parser = {'Iris-setosa': '0', 'Iris-versicolor': '1', 'Iris-virginica': '2'}
 
 
 def solve(A, b):
-    return np.linalg.lstsq(A, b)[0]
+    res = np.linalg.lstsq(A, b)
+    print('res:')
+    print(res)
+    return res[0]
 
 
 yesno = {'Yes': 1, 'No': -1}
@@ -20,14 +23,15 @@ health = {'Unhealthy': -1, 'Average': 0, 'Healthy': 1}
 employment = {'Unemployed': -1, 'Retired': 0, 'Employed': 1}
 marriage = {'Single': -1, 'Widowed': 0, 'Married': 1}
 rural_urban = {'Rural': -1, 'Urban': 1}
-diagnosis = {'Yes': 1, 'No': 1}
+diagnosis = {'Yes': 1, 'No': 0}
+
 
 def parsedata(data):
     data[0] = 0
     data[1] = (float(data[1]) - 50) / 50
     data[2] = gender[data[2]]
     data[3] = float(data[3]) / 19
-    data[4] = (float(data[3]) - 18.5) / 18
+    data[4] = (float(data[4]) - 18.5) / 18
     data[5] = physical[data[5]]
     data[6] = smoking[data[6]]
     data[7] = alcohol[data[7]]
@@ -47,7 +51,7 @@ def parsedata(data):
     data[21] = physical[data[21]]
     data[22] = physical[data[22]]
     data[23] = rural_urban[data[23]]
-    data[24] = yesno[data[24]]
+    data[24] = diagnosis[data[24]]
     return data
 
 
@@ -64,65 +68,55 @@ def split():
         for val in parser.keys():
             if line.count(val) > 0:
                 line = line.replace(val, parser[val])
+        res = ','.join(map(str, line)) + "\n"
         if random.random() < 0.2:
-            test.append()
+            test.append(res)
         else:
-            train.append(line)
+            train.append(res)
+    test[-1] = test[-1].replace('\n', '')
+    train[-1] = train[-1].replace('\n', '')
     with open('test.csv', 'w') as f:
         f.writelines(test)
     with open('train.csv', 'w') as f:
         f.writelines(train)
 
 
-def train(idx):
+def train():
     with open('train.csv') as f:
         lines = f.readlines()
     A = []
     b = []
     for line in lines:
         data = [float(x) for x in line.split(',')]
-        if data[-1] == idx:
-            data[-1] = 1
-        else:
-            data[-1] = 0
         A.append(data[:-1])
         b.append(data[-1])
+    A = np.array(A)
+    b = np.array(b)
     return solve(A, b)
 
 
-def test(weights, idx):
+def test(weights):
     with open('test.csv') as f:
         lines = f.readlines()
 
     def check(val1, val2):
-        if val1 == idx:
-            val1 = 1
-        else:
-            val1 = 0
         return val1 == round(val2)
 
     correct = 0
     for line in lines:
-        data = np.array([float(x) for x in line.split(',')[:-1]])
+        data = np.array([float(x) for x in line.split(',')[:-1]]).transpose()
         pred = np.matmul(weights, data)
         exp = float(line.split(',')[-1])
         if check(exp, pred):
             correct += 1
-        # else:
-        #     print(f'Incorrect, expected: {exp} Predicted {pred}')
-    print(f'Accuracy: {correct}/{len(lines) - 1} for {idx}')
+        else:
+            print(f'Incorrect, expected: {exp} Predicted {pred}')
+    print(f'Accuracy: {correct}/{len(lines) - 1}')
     return correct, len(lines) - 1
 
 
 if __name__ == '__main__':
-    tot = 0
-    l = 0
-    split()
-    exit()
-    for idx in range(1):
-        weights = train(idx)
-        correct, length = test(weights, idx)
-        tot += correct
-        l += length
-    print(f"Total Accuracy: {tot}/{l} = {100.0 * float(tot)/l}%")
-
+    # split()
+    weights = train()
+    correct, length = test(weights)
+    print(f"Total Accuracy: {correct}/{length} = {100.0 * float(correct) / length}%")
